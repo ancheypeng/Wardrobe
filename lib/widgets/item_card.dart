@@ -27,7 +27,7 @@ class ItemCard extends StatelessWidget {
   Card buildBaseCard() {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(18.0),
       ),
       margin: EdgeInsets.all(6.0),
       clipBehavior: Clip.antiAlias,

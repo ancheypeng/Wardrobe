@@ -35,7 +35,7 @@ class OutfitCard extends StatelessWidget {
               aspectRatio: 1,
               child: Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(18.0),
                 ),
                 color: Colors.grey[100],
                 margin: EdgeInsets.all(4.0),

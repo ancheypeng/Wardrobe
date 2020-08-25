@@ -37,6 +37,8 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   var _nameController = TextEditingController();
   var _colorController = TextEditingController();
 
+  bool _noRecognitions = false;
+
   @override
   initState() {
     super.initState();
@@ -73,11 +75,13 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
 
     var firstNameRecognition = _recognitions
         .firstWhere((recognition) => clothes.contains(recognition['tagName']));
-    print(firstNameRecognition);
     var firstColorRecognition = _recognitions
         .firstWhere((recognition) => colors.contains(recognition['tagName']));
-    print(firstColorRecognition);
-    if (firstNameRecognition['probability'] > 0.7) {
+
+    bool nameRecognized = firstNameRecognition['probability'] > 0.7;
+    bool colorRecognized = firstColorRecognition['probability'] > 0.5;
+
+    if (nameRecognized) {
       String newName = firstNameRecognition['tagName'];
       //set item name
       _nameController.value = TextEditingValue(
@@ -101,7 +105,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
         });
       }
     }
-    if (firstColorRecognition['probability'] > 0.5) {
+    if (colorRecognized) {
       String newColor = firstColorRecognition['tagName'];
       _colorController.value = TextEditingValue(
         text: newColor,
@@ -109,6 +113,11 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
           TextPosition(offset: newColor.length),
         ),
       );
+    }
+    if (!nameRecognized && !colorRecognized) {
+      setState(() {
+        _noRecognitions = true;
+      });
     }
   }
 
@@ -174,6 +183,19 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
       child: Column(
         children: <Widget>[
           _buildPredictionField(),
+          AnimatedOpacity(
+            opacity: _noRecognitions ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 150),
+            child: _noRecognitions
+                ? Text(
+                    'No predictions could be made.',
+                    style: TextStyle(
+                      fontSize: 12.0,
+                      color: Colors.red,
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ),
           _buildNameField(colorFocus),
           SizedBox(height: 20.0),
           _buildColorField(colorFocus),
@@ -188,28 +210,31 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
 
   Widget _buildPredictionField() {
     if (_recognitions != null) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Text(
-            'AI Predictions',
-            style: TextStyle(
-              fontSize: 16.0,
-              color: Colors.grey[600],
-            ),
-          ),
-          CircleAvatar(
-            backgroundColor: Colors.blue,
-            child: IconButton(
-              icon: Icon(
-                Icons.search,
-                color: Colors.white,
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 6.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Text(
+              'AI Predictions',
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.grey[600],
               ),
-              splashRadius: 28.0,
-              onPressed: _predict,
             ),
-          ),
-        ],
+            CircleAvatar(
+              backgroundColor: Colors.blue,
+              child: IconButton(
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.white,
+                ),
+                splashRadius: 28.0,
+                onPressed: _predict,
+              ),
+            ),
+          ],
+        ),
       );
     } else
       return SizedBox.shrink();

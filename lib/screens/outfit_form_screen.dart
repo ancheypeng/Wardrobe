@@ -43,6 +43,7 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
       category: _outfitCategory,
       itemsInOutfit: _selectedItems.map((item) => item.id).toList(),
       dateAdded: new DateTime.now().millisecondsSinceEpoch,
+      seasons: seasonsSelected,
     );
     await _dbHelper.saveOutfit(outfit);
 
@@ -193,7 +194,6 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
       value: seasonsSelected[seasons.indexOf(season)],
       onChanged: (bool value) => setState(() {
         seasonsSelected[seasons.indexOf(season)] = value;
-        print(seasonsSelected);
       }),
     );
   }

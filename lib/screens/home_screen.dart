@@ -129,10 +129,13 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => ItemDetailsScreen(
+          dbHelper: _dbHelper,
           item: item,
         ),
       ),
-    );
+    ).then((_) {
+      _refreshItems();
+    });
   }
 
   void _showOutfitDetails(Outfit outfit, List<Item> itemsInOutfit) {
@@ -140,11 +143,14 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => OutfitDetailsScreen(
+          dbHelper: _dbHelper,
           outfit: outfit,
           itemsInOutfit: itemsInOutfit.toList(),
         ),
       ),
-    );
+    ).then((_) {
+      _refreshItems();
+    });
   }
 
   void _onFABPress() {

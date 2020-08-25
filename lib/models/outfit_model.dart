@@ -6,6 +6,7 @@ class Outfit {
   String category;
   List<int> itemsInOutfit;
   int dateAdded;
+  List<bool> seasons;
 
   Outfit({
     this.id,
@@ -13,6 +14,7 @@ class Outfit {
     this.category,
     this.itemsInOutfit,
     this.dateAdded,
+    this.seasons,
   });
 
   Map<String, dynamic> toMap() {
@@ -21,6 +23,10 @@ class Outfit {
       'name': name,
       'category': category,
       'dateAdded': dateAdded,
+      'summer': boolToInt(seasons[0]),
+      'spring': boolToInt(seasons[1]),
+      'fall': boolToInt(seasons[2]),
+      'winter': boolToInt(seasons[3]),
     };
   }
 
@@ -29,6 +35,20 @@ class Outfit {
     name = map['name'];
     category = map['category'];
     dateAdded = map['dateAdded'];
+    seasons = [
+      intToBool(map['summer']),
+      intToBool(map['spring']),
+      intToBool(map['fall']),
+      intToBool(map['winter']),
+    ];
+  }
+
+  int boolToInt(bool b) {
+    return b ? 1 : 0;
+  }
+
+  bool intToBool(int x) {
+    return x == 1 ? true : false;
   }
 
   bool contains(String str) {
@@ -41,6 +61,12 @@ class Outfit {
 
   @override
   String toString() {
-    return (id.toString() + " " + name + " " + category + " " + itemsInOutfit.toString());
+    return (id.toString() +
+        " " +
+        name +
+        " " +
+        category +
+        " " +
+        itemsInOutfit.toString());
   }
 }

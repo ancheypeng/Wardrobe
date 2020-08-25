@@ -20,11 +20,28 @@ class DbHelper {
     final Future<Database> database = openDatabase(
       join(await getDatabasesPath(), 'item_database.db'),
       onCreate: (db, version) async {
-        await db.execute(
-          "CREATE TABLE items(id INTEGER PRIMARY KEY, image TEXT, name TEXT, color TEXT, category TEXT, dateAdded INTEGER)",
-        );
-        await db.execute(
-            "CREATE TABLE outfits(id INTEGER PRIMARY KEY, name TEXT, category TEXT, dateAdded INTEGER)");
+        await db.execute('''
+          CREATE TABLE items(
+            id INTEGER PRIMARY KEY,
+            image TEXT,
+            name TEXT,
+            color TEXT,
+            category TEXT,
+            dateAdded INTEGER
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE outfits(
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            category TEXT,
+            dateAdded INTEGER,
+            summer BIT,
+            spring BIT,
+            fall BIT,
+            winter BIT
+          )
+        ''');
         await db.execute('''
           CREATE TABLE outfitItems(
             itemId INTEGER REFERENCES items(id),
@@ -53,6 +70,12 @@ class DbHelper {
     );
   }
 
+  Future<void> deleteItem(int itemId) async {
+    final Database db = await _getDatabase;
+    await db.rawDelete('DELETE FROM items WHERE id=$itemId');
+    await db.rawDelete('DELETE FROM outfitItems WHERE itemId=$itemId');
+  }
+
   Future getItems() async {
     final Database db = await _getDatabase;
 
@@ -72,9 +95,16 @@ class DbHelper {
       outfit.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    for (int itemId in outfit.itemsInOutfit){
-      await db.rawInsert('INSERT INTO outfitItems VALUES ($itemId, ${outfit.id})');
+    for (int itemId in outfit.itemsInOutfit) {
+      await db
+          .rawInsert('INSERT INTO outfitItems VALUES ($itemId, ${outfit.id})');
     }
+  }
+
+  Future<void> deleteOutfit(int outfitId) async {
+    final Database db = await _getDatabase;
+    await db.rawDelete('DELETE FROM outfits WHERE id=$outfitId');
+    await db.rawDelete('DELETE FROM outfitItems WHERE outfitId=$outfitId');
   }
 
   Future getOutfits() async {
@@ -85,19 +115,21 @@ class DbHelper {
       return Outfit.fromMap(maps[i]);
     });
 
-    for (Outfit outfit in outfits){
-      final itemsInOutfit = await db.rawQuery("SELECT items.id FROM outfitItems JOIN items on outfitItems.itemId = items.id WHERE outfitItems.outfitId = ${outfit.id}");
-      outfit.itemsInOutfit = itemsInOutfit.map((itemInOutfit) => itemInOutfit['id'] as int).toList();
+    for (Outfit outfit in outfits) {
+      final itemsInOutfit = await db.rawQuery(
+          "SELECT items.id FROM outfitItems JOIN items on outfitItems.itemId = items.id WHERE outfitItems.outfitId = ${outfit.id}");
+      outfit.itemsInOutfit = itemsInOutfit
+          .map((itemInOutfit) => itemInOutfit['id'] as int)
+          .toList();
       //print(outfit);
     }
 
     //"SELECT items.* FROM outfitItems as oi JOIN items WHERE oi.outfitId = ${outfit.id}"
 
-    // SELECT ITEMS.* FROM outfitItems 
-    //  JOIN ITEMS ON outfitItems.itemId = ITEMS.id 
+    // SELECT ITEMS.* FROM outfitItems
+    //  JOIN ITEMS ON outfitItems.itemId = ITEMS.id
     //  WHERE outfitItems.outfitId = 154
 
     return outfits;
-    
   }
 }
