@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wardrobe/database/db_helper.dart';
 import 'package:wardrobe/models/item_model.dart';
-import 'package:wardrobe/widgets/bottom_bar.dart';
 import 'package:wardrobe/widgets/filter_tabs.dart';
 import 'package:wardrobe/widgets/item_card.dart';
 import 'package:wardrobe/widgets/search_bar.dart';
-import 'dart:convert';
-import 'image_capture_screen.dart';
 
 class ItemScreen extends StatefulWidget {
   final List<Item> items;
@@ -129,30 +125,31 @@ class _ItemScreenState extends State<ItemScreen> with TickerProviderStateMixin {
         Image itemImage = item.imageWidget;
         bool selected = _selectedItems.contains(item);
 
-        return Hero(
-          tag: item.id,
-          child: Stack(
-            children: [
-              ItemCard(
+        return Stack(
+          children: [
+            Hero(
+              tag: item.id,
+              child: ItemCard(
                 itemImage: itemImage,
                 selected: selected,
               ),
-              Positioned.fill(
-                bottom: 2.5,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    margin: EdgeInsets.all(6.0), //same as ItemCard/OutfitCard
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(
-                          12.0), //same as ItemCard/OutfitCard
-                      onTap: () => _onItemCardTap(item),
-                    ),
+            ),
+            //transparent overlay for inkwell effect
+            Positioned.fill(
+              bottom: 2.5,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  margin: EdgeInsets.all(6.0), //same as ItemCard/OutfitCard
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(
+                        12.0), //same as ItemCard/OutfitCard
+                    onTap: () => _onItemCardTap(item),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

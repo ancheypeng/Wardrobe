@@ -16,6 +16,15 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return selected
+        ? Transform.scale(
+            scale: 0.9,
+            child: buildBaseCard(),
+          )
+        : buildBaseCard();
+  }
+
+  Card buildBaseCard() {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
@@ -29,7 +38,7 @@ class ItemCard extends StatelessWidget {
     );
   }
 
-  Image _buildUnselected() {
+  Widget _buildUnselected() {
     return itemImage;
   }
 
@@ -46,7 +55,7 @@ class ItemCard extends StatelessWidget {
           child: itemImage,
         ),
         Icon(
-          Icons.check,
+          Icons.check_circle_outline,
           color: Colors.white,
           size: 30.0,
         ),

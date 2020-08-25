@@ -180,7 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Home'),
       ),
-      backgroundColor: Colors.grey[200],
       body: SafeArea(
         child: _screens[_selectedIndex],
       ),

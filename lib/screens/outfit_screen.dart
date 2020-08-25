@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wardrobe/database/db_helper.dart';
 import 'package:wardrobe/models/item_model.dart';
 import 'package:wardrobe/models/outfit_model.dart';
-import 'package:wardrobe/widgets/bottom_bar.dart';
 import 'package:wardrobe/widgets/filter_tabs.dart';
 import 'package:wardrobe/widgets/outfit_card.dart';
 import 'package:wardrobe/widgets/search_bar.dart';
@@ -30,8 +28,10 @@ class _OutfitScreenState extends State<OutfitScreen>
 
   final List<String> _filterTabNames = [
     'All',
+    'Athletic',
     'Casual',
     'Formal',
+    'Other'
   ];
   int _numFilterTabs;
   List<List<int>> _filterItems;
@@ -53,7 +53,6 @@ class _OutfitScreenState extends State<OutfitScreen>
     _tabController = TabController(length: _numFilterTabs, vsync: this);
 
     _onOutfitCardTap = widget.onOutfitCardTap ?? (_, __) {};
-
   }
 
   @override
@@ -122,7 +121,8 @@ class _OutfitScreenState extends State<OutfitScreen>
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 8.0 / 10.0,
+        //childAspectRatio: 8.0 / 10.0,
+        //childAspectRatio: 1.0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 10.0),
       //itemCount: _searchFilterItems[index].length,
@@ -136,29 +136,26 @@ class _OutfitScreenState extends State<OutfitScreen>
                   return item.id == itemId;
                 }).first)
             .toList();
-        return Hero(
-          tag: outfit.id,
-          child: Stack(
-            children: [
-              OutfitCard(
-                itemsInOutfit: itemsInOutfit,
-                outfit: outfit,
-              ),
-              Positioned.fill(
-              bottom: 2.5,
+        return Stack(
+          children: [
+            OutfitCard(
+              itemsInOutfit: itemsInOutfit,
+              outfit: outfit,
+            ),
+            Positioned.fill(
               child: Material(
                 color: Colors.transparent,
                 child: Container(
-                  margin: EdgeInsets.all(6.0), //same as ItemCard/OutfitCard
+                  margin: EdgeInsets.all(4.0), //same as ItemCard/OutfitCard
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(12.0), //same as ItemCard/OutfitCard
+                    borderRadius: BorderRadius.circular(
+                        12.0), //same as ItemCard/OutfitCard
                     onTap: () => _onOutfitCardTap(outfit, itemsInOutfit),
                   ),
                 ),
               ),
             ),
-            ],
-          ),
+          ],
         );
       },
     );

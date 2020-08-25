@@ -4,11 +4,11 @@ import 'package:wardrobe/models/outfit_model.dart';
 import 'package:wardrobe/widgets/outfit_card.dart';
 
 class OutfitDetailsScreen extends StatelessWidget {
-
   final List<Item> itemsInOutfit;
   final Outfit outfit;
 
-  const OutfitDetailsScreen({Key key, this.outfit, this.itemsInOutfit }) : super(key: key);
+  const OutfitDetailsScreen({Key key, this.outfit, this.itemsInOutfit})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +38,9 @@ class OutfitDetailsScreen extends StatelessWidget {
     return GestureDetector(
       child: Container(
         height: 200,
-        child: Hero(
-          tag: outfit.id,
-          child: OutfitCard(
-            outfit: outfit,
-            itemsInOutfit: itemsInOutfit,
-          ),
+        child: OutfitCard(
+          outfit: outfit,
+          itemsInOutfit: itemsInOutfit,
         ),
       ),
       onTap: () {

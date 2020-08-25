@@ -24,6 +24,8 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   String _outfitName;
   String _outfitCategory = 'Casual';
+  List<String> seasons = ['Summer', 'Fall', 'Spring', 'Winter'];
+  List<bool> seasonsSelected = [false, false, false, false];
 
   @override
   void initState() {
@@ -32,7 +34,7 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
     _selectedItems = widget.selectedItems;
   }
 
-  void _confirm(BuildContext context) async{
+  void _confirm(BuildContext context) async {
     final rng = new Random();
     final num = rng.nextInt(10000000);
     final outfit = Outfit(
@@ -102,6 +104,8 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
           SizedBox(height: 20.0),
           _buildDropdown(),
           SizedBox(height: 20.0),
+          _buildCheckboxes(),
+          SizedBox(height: 20.0),
           _buildButtonRow(),
         ],
       ),
@@ -138,7 +142,7 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
               _outfitCategory = newValue;
             });
           },
-          items: <String>['Casual', 'Formal', 'Other']
+          items: <String>['Athletic', 'Casual', 'Formal', 'Other']
               .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
@@ -147,6 +151,50 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  _buildCheckboxes() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              buildCheckboxListTile('Summer'),
+              buildCheckboxListTile('Fall'),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              buildCheckboxListTile('Spring'),
+              buildCheckboxListTile('Winter'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  CheckboxListTile buildCheckboxListTile(String season) {
+    return CheckboxListTile(
+      title: Text(
+        season,
+        style: TextStyle(
+          fontSize: 16.0,
+          color: Colors.grey[600],
+        ),
+      ),
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.all(0),
+      dense: true,
+      value: seasonsSelected[seasons.indexOf(season)],
+      onChanged: (bool value) => setState(() {
+        seasonsSelected[seasons.indexOf(season)] = value;
+        print(seasonsSelected);
+      }),
     );
   }
 

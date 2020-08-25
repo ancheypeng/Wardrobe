@@ -58,6 +58,10 @@ class _ColorChart extends State<ColorChart> {
               colorData.add(new ColorData(itemColor, 1, Colors.blue[200]));
             }
             break;
+          case "maroon":
+            {
+              colorData.add(new ColorData(itemColor, 1, Colors.red[900]));
+            }
         }
       }
     }
