@@ -4,6 +4,7 @@ import 'package:wardrobe/models/item_model.dart';
 import 'package:wardrobe/widgets/item_card.dart';
 
 import 'full_image_screen.dart';
+import 'item_form_screen.dart';
 
 class ItemDetailsScreen extends StatelessWidget {
   final DbHelper dbHelper;
@@ -19,7 +20,9 @@ class ItemDetailsScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () {},
+            onPressed: () {
+              edit(context);
+            },
           ),
           IconButton(
             icon: Icon(Icons.delete),
@@ -83,6 +86,22 @@ class ItemDetailsScreen extends StatelessWidget {
     );
   }
 
+  void edit(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ItemFormScreen(
+          dbHelper: dbHelper,
+          item: item,
+        ),
+      ),
+    ).then((val) {
+      if (val == 'refresh') {
+        Navigator.of(context).pop('refresh');
+      }
+    });
+  }
+
   void showDeleteDialog(BuildContext context) {
     // flutter defined function
     showDialog(
@@ -119,6 +138,8 @@ class ItemDetailsScreen extends StatelessWidget {
   void delete(BuildContext context) async {
     await dbHelper.deleteItem(item.id);
 
-    Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    //Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    Navigator.pop(context); //pop to close dialog
+    Navigator.of(context).pop('refresh'); //pop to previous screen
   }
 }

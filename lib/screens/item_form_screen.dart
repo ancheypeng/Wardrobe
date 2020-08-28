@@ -12,12 +12,17 @@ class ItemFormScreen extends StatefulWidget {
   final DbHelper dbHelper;
   final File imageFile;
   final List recognitions;
+  final List colorRecognitions;
+
+  final Item item;
 
   ItemFormScreen({
     Key key,
     @required this.dbHelper,
-    @required this.imageFile,
+    this.imageFile,
     this.recognitions,
+    this.colorRecognitions,
+    this.item,
   }) : super(key: key);
 
   @override
@@ -28,6 +33,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   DbHelper _dbHelper;
   File _imageFile;
   List _recognitions;
+  List _colorRecognitions;
 
   final _formKey = GlobalKey<FormState>();
   String _itemName;
@@ -39,20 +45,35 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
 
   bool _noRecognitions = false;
 
+  Item _item;
+  bool _editMode;
+
   @override
   initState() {
     super.initState();
     _dbHelper = widget.dbHelper;
     _imageFile = widget.imageFile;
     _recognitions = widget.recognitions;
+    _colorRecognitions = widget.colorRecognitions;
+
+    _item = widget.item;
+    _editMode = _item != null ? true : false;
+    if (_editMode) {
+      _nameController = TextEditingController(text: _item.name);
+      _colorController = TextEditingController(text: _item.color);
+      _itemCategory = _item.category;
+      _itemName = _item.name;
+      _itemColor = _item.color;
+    }
   }
 
   void _confirm(BuildContext context) async {
     final rng = new Random();
-    final num = rng.nextInt(10000000);
-    final String encodedImage = base64Encode(_imageFile.readAsBytesSync());
+    final id = _editMode ? _item.id : rng.nextInt(10000000);
+    final String encodedImage =
+        _editMode ? _item.image : base64Encode(_imageFile.readAsBytesSync());
     final item = Item(
-      id: num,
+      id: id,
       image: encodedImage,
       name: _itemName,
       color: _itemColor,
@@ -61,63 +82,62 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     );
     await _dbHelper.saveItem(item);
 
-    Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    if (_editMode) {
+      Navigator.of(context).pop('refresh');
+    } else {
+      Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    }
   }
 
   void _predict() {
     List<String> tops = ['T-Shirt', 'Shirt', 'Hoodie'];
     List<String> bottoms = ['Jeans'];
     List<String> accessories = ['Sneakers'];
-    List<String> clothes =
-        [tops, bottoms, accessories].expand((x) => x).toList();
 
-    List<String> colors = ['Black', 'Blue', 'Navy', 'White', 'Grey', 'Maroon'];
+    var firstNameRecognition = _recognitions.first;
+    var firstColorRecognition = _colorRecognitions.first;
 
-    var firstNameRecognition = _recognitions
-        .firstWhere((recognition) => clothes.contains(recognition['tagName']));
-    var firstColorRecognition = _recognitions
-        .firstWhere((recognition) => colors.contains(recognition['tagName']));
+    bool nameRecognized = firstNameRecognition['confidence'] > 0.5;
+    bool colorRecognized = firstColorRecognition['confidence'] > 0.5;
 
-    bool nameRecognized = firstNameRecognition['probability'] > 0.7;
-    bool colorRecognized = firstColorRecognition['probability'] > 0.5;
-
-    if (nameRecognized) {
-      String newName = firstNameRecognition['tagName'];
-      //set item name
-      _nameController.value = TextEditingValue(
-        text: newName,
-        selection: TextSelection.fromPosition(
-          TextPosition(offset: newName.length),
-        ),
-      );
-      //set item category
-      if (tops.contains(newName)) {
-        setState(() {
-          _itemCategory = 'Tops';
-        });
-      } else if (bottoms.contains(newName)) {
-        setState(() {
-          _itemCategory = 'Bottoms';
-        });
-      } else if (accessories.contains(newName)) {
-        setState(() {
-          _itemCategory = 'Accessories';
-        });
-      }
-    }
-    if (colorRecognized) {
-      String newColor = firstColorRecognition['tagName'];
-      _colorController.value = TextEditingValue(
-        text: newColor,
-        selection: TextSelection.fromPosition(
-          TextPosition(offset: newColor.length),
-        ),
-      );
-    }
     if (!nameRecognized && !colorRecognized) {
       setState(() {
         _noRecognitions = true;
       });
+    } else {
+      if (nameRecognized) {
+        String newName = firstNameRecognition['label'];
+        //set item name
+        _nameController.value = TextEditingValue(
+          text: newName,
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: newName.length),
+          ),
+        );
+        //set item category
+        if (tops.contains(newName)) {
+          setState(() {
+            _itemCategory = 'Tops';
+          });
+        } else if (bottoms.contains(newName)) {
+          setState(() {
+            _itemCategory = 'Bottoms';
+          });
+        } else if (accessories.contains(newName)) {
+          setState(() {
+            _itemCategory = 'Accessories';
+          });
+        }
+      }
+      if (colorRecognized) {
+        String newColor = firstColorRecognition['label'];
+        _colorController.value = TextEditingValue(
+          text: newColor,
+          selection: TextSelection.fromPosition(
+            TextPosition(offset: newColor.length),
+          ),
+        );
+      }
     }
   }
 
@@ -153,10 +173,12 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
         child: Hero(
           tag: 'imageHero',
           child: ItemCard(
-            itemImage: Image.file(
-              _imageFile,
-              fit: BoxFit.cover,
-            ),
+            itemImage: _editMode
+                ? _item.imageWidget
+                : Image.file(
+                    _imageFile,
+                    fit: BoxFit.cover,
+                  ),
           ),
         ),
       ),
@@ -165,9 +187,11 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => FullImageScreen(
-              itemImage: Image.file(
-                _imageFile,
-              ),
+              itemImage: _editMode
+                  ? _item.imageWidget
+                  : Image.file(
+                      _imageFile,
+                    ),
             ),
           ),
         );

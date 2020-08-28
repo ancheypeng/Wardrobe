@@ -133,8 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
           item: item,
         ),
       ),
-    ).then((_) {
-      _refreshItems();
+    ).then((val) {
+      if (val == 'refresh') {
+        _refreshItems();
+      }
     });
   }
 
@@ -148,8 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
           itemsInOutfit: itemsInOutfit.toList(),
         ),
       ),
-    ).then((_) {
-      _refreshItems();
+    ).then((val) {
+      if (val == 'refresh') {
+        _refreshItems();
+      }
     });
   }
 

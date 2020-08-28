@@ -1,5 +1,3 @@
-import 'item_model.dart';
-
 class Outfit {
   int id;
   String name;
@@ -7,6 +5,7 @@ class Outfit {
   List<int> itemsInOutfit;
   int dateAdded;
   List<bool> seasons;
+  List<String> seasonNames = [];
 
   Outfit({
     this.id,
@@ -41,6 +40,18 @@ class Outfit {
       intToBool(map['fall']),
       intToBool(map['winter']),
     ];
+    if (seasons[0]) {
+      seasonNames.add('Summer');
+    }
+    if (seasons[1]) {
+      seasonNames.add('Spring');
+    }
+    if (seasons[2]) {
+      seasonNames.add('Fall');
+    }
+    if (seasons[3]) {
+      seasonNames.add('Winter');
+    }
   }
 
   int boolToInt(bool b) {

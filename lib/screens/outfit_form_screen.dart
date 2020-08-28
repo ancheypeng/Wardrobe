@@ -9,7 +9,16 @@ import 'package:wardrobe/widgets/outfit_card.dart';
 class OutfitFormScreen extends StatefulWidget {
   final DbHelper dbHelper;
   final List<Item> selectedItems;
-  OutfitFormScreen({Key key, this.dbHelper, this.selectedItems})
+
+  final Outfit outfit;
+  final List<Item> itemsInOutfit;
+
+  OutfitFormScreen(
+      {Key key,
+      this.dbHelper,
+      this.selectedItems,
+      this.outfit,
+      this.itemsInOutfit})
       : super(key: key);
 
   @override
@@ -27,18 +36,30 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
   List<String> seasons = ['Summer', 'Fall', 'Spring', 'Winter'];
   List<bool> seasonsSelected = [false, false, false, false];
 
+  Outfit _outfit;
+  bool _editMode;
+
   @override
   void initState() {
     super.initState();
     _dbHelper = widget.dbHelper;
     _selectedItems = widget.selectedItems;
+
+    _outfit = widget.outfit;
+    _editMode = _outfit != null ? true : false;
+    if (_editMode) {
+      _selectedItems = widget.itemsInOutfit;
+      _outfitCategory = _outfit.category;
+      _outfitName = _outfit.name;
+      seasonsSelected = _outfit.seasons;
+    }
   }
 
   void _confirm(BuildContext context) async {
     final rng = new Random();
-    final num = rng.nextInt(10000000);
+    final id = _editMode ? _outfit.id : rng.nextInt(10000000);
     final outfit = Outfit(
-      id: num,
+      id: id,
       name: _outfitName,
       category: _outfitCategory,
       itemsInOutfit: _selectedItems.map((item) => item.id).toList(),
@@ -47,7 +68,11 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
     );
     await _dbHelper.saveOutfit(outfit);
 
-    Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    if (_editMode) {
+      Navigator.of(context).pop('refresh');
+    } else {
+      Navigator.popUntil(context, ModalRoute.withName('/homeScreen'));
+    }
   }
 
   @override
@@ -88,6 +113,7 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
       child: Column(
         children: <Widget>[
           TextFormField(
+            initialValue: _editMode ? _outfit.name : null,
             autofocus: false,
             //textInputAction: TextInputAction.next,
             textCapitalization: TextCapitalization.sentences,
@@ -155,46 +181,88 @@ class _OutfitFormScreenState extends State<OutfitFormScreen> {
     );
   }
 
+  // _buildCheckboxes() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Expanded(
+  //         child: Column(
+  //           children: [
+  //             buildFilterChip('Summer'),
+  //             buildFilterChip('Fall'),
+  //           ],
+  //         ),
+  //       ),
+  //       Expanded(
+  //         child: Column(
+  //           children: [
+  //             buildFilterChip('Spring'),
+  //             buildFilterChip('Winter'),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
   _buildCheckboxes() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              buildCheckboxListTile('Summer'),
-              buildCheckboxListTile('Fall'),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              buildCheckboxListTile('Spring'),
-              buildCheckboxListTile('Winter'),
-            ],
-          ),
-        ),
-      ],
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 220,
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 15.0, // gap between adjacent chips
+        runSpacing: 4.0, // gap between lines
+        children: [
+          buildFilterChip('Summer'),
+          buildFilterChip('Spring'),
+          buildFilterChip('Fall'),
+          buildFilterChip('Winter'),
+        ],
+      ),
     );
   }
 
-  CheckboxListTile buildCheckboxListTile(String season) {
-    return CheckboxListTile(
-      title: Text(
-        season,
-        style: TextStyle(
-          fontSize: 16.0,
-          color: Colors.grey[600],
+  // CheckboxListTile buildCheckboxListTile(String season) {
+  //   return CheckboxListTile(
+  //     title: Text(
+  //       season,
+  //       style: TextStyle(
+  //         fontSize: 16.0,
+  //         color: Colors.grey[600],
+  //       ),
+  //     ),
+  //     controlAffinity: ListTileControlAffinity.leading,
+  //     contentPadding: EdgeInsets.all(0),
+  //     dense: true,
+  //     value: seasonsSelected[seasons.indexOf(season)],
+  //     onChanged: (bool value) => setState(() {
+  //       seasonsSelected[seasons.indexOf(season)] = value;
+  //     }),
+  //   );
+  // }
+
+  Widget buildFilterChip(String season) {
+    return Theme(
+      data: ThemeData.dark(),
+      child: FilterChip(
+        label: Text(
+          season,
+          style: TextStyle(
+            fontSize: 16.0,
+            color: seasonsSelected[seasons.indexOf(season)]
+                ? Colors.white
+                : Colors.grey[600],
+          ),
         ),
+        backgroundColor: Colors.grey[300],
+        selectedColor: Colors.blue,
+        selected: seasonsSelected[seasons.indexOf(season)],
+        onSelected: (bool value) => setState(() {
+          seasonsSelected[seasons.indexOf(season)] = value;
+        }),
       ),
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.all(0),
-      dense: true,
-      value: seasonsSelected[seasons.indexOf(season)],
-      onChanged: (bool value) => setState(() {
-        seasonsSelected[seasons.indexOf(season)] = value;
-      }),
     );
   }
 

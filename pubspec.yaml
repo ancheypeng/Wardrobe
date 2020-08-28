@@ -36,3 +36,6 @@ flutter:
   assets:
     - assets/model/labels.txt
     - assets/model/model.tflite
+    - assets/model/model2.tflite
+    - assets/model/colorLabels.txt
+    - assets/model/colorModel.tflite

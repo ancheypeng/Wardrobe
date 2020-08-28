@@ -73,7 +73,21 @@ class DbHelper {
   Future<void> deleteItem(int itemId) async {
     final Database db = await _getDatabase;
     await db.rawDelete('DELETE FROM items WHERE id=$itemId');
+    final outfitIds = await db
+        .rawQuery('SELECT outfitId FROM outfitItems WHERE itemId=$itemId');
+
     await db.rawDelete('DELETE FROM outfitItems WHERE itemId=$itemId');
+
+    //deletes any outfits if last item was deleted from it
+    for (var outfitId in outfitIds) {
+      final outfitEmptyQuery = await db.rawQuery(
+          'SELECT * FROM outfitItems WHERE outfitId=${outfitId['outfitId']}'); //need to get outfitId property from the outfitId object
+      final bool outfitEmpty = outfitEmptyQuery.isEmpty;
+      if (outfitEmpty) {
+        await db
+            .rawDelete('DELETE FROM outfits WHERE id=${outfitId['outfitId']}');
+      }
+    }
   }
 
   Future getItems() async {
@@ -96,8 +110,8 @@ class DbHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     for (int itemId in outfit.itemsInOutfit) {
-      await db
-          .rawInsert('INSERT INTO outfitItems VALUES ($itemId, ${outfit.id})');
+      await db.rawInsert(
+          'INSERT OR REPLACE INTO outfitItems VALUES ($itemId, ${outfit.id})');
     }
   }
 

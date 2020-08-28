@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:wardrobe/models/item_model.dart';
 
@@ -18,7 +16,7 @@ class FullImageScreen extends StatelessWidget {
         child: Center(
           child: Hero(
             tag: item != null ? item.id : 'imageHero',
-            child: item!= null ? item.imageWidget : itemImage,
+            child: item != null ? item.imageWidget : itemImage,
           ),
         ),
         onTap: () {

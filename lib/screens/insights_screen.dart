@@ -16,12 +16,12 @@ class InsightsScreen extends StatefulWidget {
 
 class _InsightsScreenState extends State<InsightsScreen> {
   List<Item> _items;
-  List<Outfit> _outfits;
+  //List<Outfit> _outfits;
 
   @override
   void initState() {
     _items = widget.items;
-    _outfits = widget.outfits;
+    //_outfits = widget.outfits;
     super.initState();
   }
 
